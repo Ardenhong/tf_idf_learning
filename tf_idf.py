@@ -1,7 +1,8 @@
 import pandas as pd
 import pprint
 from math import log
-
+import pprint as pp
+# dataset : https://clay-atlas.com/blog/2020/08/01/nlp-%E6%96%87%E5%AD%97%E6%8E%A2%E5%8B%98%E4%B8%AD%E7%9A%84-tf-idf-%E6%8A%80%E8%A1%93/
 # implement tfidf,ref:  https://ithelp.ithome.com.tw/articles/10214726
 
 
@@ -17,6 +18,13 @@ doc_all = [doc_0, doc_1, doc_2, doc_3]
 
 # normalize doc
 doc_all = [sentence.lower() for sentence in doc_all]
+
+
+# remove word len<2
+for i in range(len(doc_all)):
+    doc_all[i] = doc_all[i].split()
+    doc_all[i] = [ w for w in doc_all[i] if len(w) >=2 ]
+    doc_all[i] = ' '.join(doc_all[i])
 
 all_word_lower_str = ''
 for sentence in doc_all:
@@ -41,6 +49,11 @@ def cal_tf(all_word_lower_str) -> dict:
     tf = {}
     for word in term_count:
         tf[word] = term_count[word] / len(term_count)
+        
+    pp.pprint("tf :")
+    pp.pprint(tf)
+    print("----------")
+    
 
     return tf
 
@@ -65,23 +78,23 @@ def cal_idf(all_word_lower_str, doc_all):
     for word in words:
         document_count[word] = 0
 
-    for sentence in doc_all:
-        for word in words:
+    for word in words:
+        for sentence in doc_all:
             if word_in_sentence(word, sentence):
                 document_count[word] += 1
 
-    df = {}
+    # df = {}
     idf = {}
-    for word, d_count in document_count.items():
-        df[word] = d_count / len(doc_all)
+    # for word, d_count in document_count.items():
+    #     df[word] = d_count / len(doc_all)
 
     for word, d_count in document_count.items():
         idf[word] = len(doc_all) / d_count
 
-    print(f"DF : {df}")
+    # print(f"DF : {df}")
 
-    print(f"\n IDF before log")
-    pprint.pprint(idf)
+    # print(f"\n IDF before log")
+    # pprint.pprint(idf)
 
     for word, _num in idf.items():
         idf[word] = log(_num)
@@ -103,7 +116,7 @@ def cal_tfidf(tf, idf, words):
     tfidf = {}
     for word in words:
         if idf[word]:
-            tfidf[word] = tf[word]/idf[word]
+            tfidf[word] = tf[word]*idf[word]
         else:
             tfidf[word] = 0
     return tfidf
